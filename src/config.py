@@ -9,3 +9,6 @@ SERVER_PORT = os.environ.get("ZEPHYR_SERVER_PORT", "50051")
 SERVER_NAME = f"{SERVER_HOST}:{SERVER_PORT}"
 
 JWT_SIGNING_ALGORITHM = 'HS256'
+
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)

@@ -3,7 +3,7 @@ from time import time
 import jwt
 import bcrypt
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, joinedload
 
 from config import *
 from db.models.user import User
@@ -96,11 +96,15 @@ class DbHelper:
             raise e
         return conversation
     
-    def get_conversation(self, id: str) -> Conversation:
+    def get_conversation(self, id: str, load_relation = False) -> Conversation:
         session = self.session_factory()
         conversation = None
         try:
-            conversation = session.query(Conversation).filter_by(id=id).first()
+            if load_relation:
+                conversation = session.query(Conversation).filter_by(id=id).options(
+                    joinedload('*')).first()
+            else:
+                conversation = session.query(Conversation).filter_by(id=id).first()
         except Exception as e:
             raise e
         return conversation
