@@ -80,7 +80,6 @@ class EventService(event_pb2_grpc.EventServiceServicer):
                     self.__make_create_event_call(stub, request, user_id, conversation.id)
                     
         except Exception as e:
-            raise
             message = f'Error while creating event: {str(e)}'
             print(message)
             context.abort(code=StatusCode.ABORTED, details=message)
