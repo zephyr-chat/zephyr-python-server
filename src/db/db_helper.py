@@ -1,3 +1,5 @@
+from time import time
+
 import jwt
 import bcrypt
 from sqlalchemy import create_engine
@@ -6,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 from config import *
 from db.models.user import User
 from db.models.conversation import Conversation, ConversationMember
+from db.models.event import Event
 
 ENCODING = 'utf-8'
 
@@ -82,18 +85,25 @@ class DbHelper:
         return user
     
     def add_conversation(self, name: str) -> Conversation:
-        result = None
         conversation = Conversation(name=name)
         session = self.session_factory()
         try:
             session.add(conversation)
             session.commit()
-            result = conversation
-            session.refresh(result)
+            session.refresh(conversation)
         except Exception as e:
             session.rollback()
             raise e
-        return result
+        return conversation
+    
+    def get_conversation(self, id: str) -> Conversation:
+        session = self.session_factory()
+        conversation = None
+        try:
+            conversation = session.query(Conversation).filter_by(id=id).first()
+        except Exception as e:
+            raise e
+        return conversation
     
     def get_conversations(self, user_id: str) -> list[Conversation]:
         session = self.session_factory()
@@ -117,3 +127,22 @@ class DbHelper:
         except Exception as e:
             session.rollback()
             raise e
+        
+    def add_event(self, user: User, conversation: Conversation, content: str, type: int, previous_event_id: int) -> Event:
+        event = Event(
+            user_id=user.id,
+            conversation_id=conversation.id,
+            type=type,
+            content=content,
+            previous_event_id=previous_event_id,
+            timestamp=int(time())
+        )
+        session = self.session_factory()
+        try:
+            session.add(event)
+            session.commit()
+            session.refresh(event)
+        except Exception as e:
+            session.rollback()
+            raise e
+        return event

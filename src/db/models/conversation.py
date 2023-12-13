@@ -9,6 +9,7 @@ class Conversation(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     members = relationship("ConversationMember")
+    events = relationship("Event")
 
 class ConversationMember(Base):
     __tablename__ = 'conversation_members'

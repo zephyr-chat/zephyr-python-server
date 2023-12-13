@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package zephyr;
+
+service EventService {
+    rpc CreateEvent(CreateEventRequest) returns (Event);
+    rpc GetEvents(GetEventsRequest) returns (GetEventsReply);
+    rpc StreamEvents(EmptyRequest) returns (stream Event);
+}
+
+enum ContentType {
+    MESSAGE = 0;
+    ATTACHMENT = 1;
+}
+
+message Event {
+    int64 id = 1;
+    string user_id = 2;
+    string user_display_name = 3;
+    int64 conversation_id = 4;
+    ContentType type = 5;
+    string content = 6;
+    int64 previous_event_id = 7;
+    int64 timestamp = 8;
+}
+
+message CreateEventRequest {
+    int64 conversation_id = 1;
+    string content = 2;
+    ContentType type = 3;
+    int64 previous_event_id = 4;
+}
+
+message GetEventsRequest {
+    int64 conversation_id = 1;
+}
+
+message GetEventsReply {
+    repeated Event events = 1;
+}
+
+message EmptyRequest {}
