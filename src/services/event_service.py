@@ -40,7 +40,6 @@ class EventService(event_pb2_grpc.EventServiceServicer):
                     user_id = f"{member.user.username}@{SERVER_NAME}"
                     self.redis_helper.push_event(user_id, reply)
         except Exception as e:
-            raise e
             message = f'Error while creating event: {str(e)}'
             print(message)
             context.abort(code=StatusCode.ABORTED, details=message)

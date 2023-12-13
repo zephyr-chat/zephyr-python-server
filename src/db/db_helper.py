@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, joinedload
 
 from config import *
 from db.models.user import User
-from db.models.conversation import Conversation, ConversationMember
+from db.models.conversation import Conversation, ConversationMember, FederatedConversationMapping
 from db.models.event import Event
 
 ENCODING = 'utf-8'
@@ -29,19 +29,21 @@ class DbHelper:
         return bcrypt.checkpw(
             password.encode(ENCODING), hash.encode(ENCODING)) 
 
-    def add_user(self, username: str, password: str, display_name: str):
+    def add_user(self, username: str, password: str, display_name: str, server: str=SERVER_NAME) -> str:
         session = self.session_factory()
         user = User(
             username=username, 
             password=self.__get_password_hash(password), 
-            server=SERVER_NAME, 
+            server=server, 
             display_name=display_name)
         try:
             session.add(user)
             session.commit()
+            session.refresh(user)
         except Exception as e:
             session.rollback()
             raise e
+        return user.id
         
     def get_user(self, username: str, server: str) -> User | None:
         session = self.session_factory()
@@ -49,7 +51,7 @@ class DbHelper:
         try:
             user = session.query(User).filter_by(username=username, server=server).first()
         except Exception as e:
-            raise e
+            print(f"Error occured while getting user {str(e)}")
         return user
         
     def verify_password_and_get_user(self, username: str, password: str) -> User | None:
@@ -150,3 +152,15 @@ class DbHelper:
             session.rollback()
             raise e
         return event
+    
+    def add_fed_conv_mapping(self, conversation_id: str, fed_conv_id: str) -> FederatedConversationMapping:
+        mapping = FederatedConversationMapping(conversation_id=conversation_id, fed_conv_id=fed_conv_id)
+        session = self.session_factory()
+        try:
+            session.add(mapping)
+            session.commit()
+            session.refresh(mapping)
+        except Exception as e:
+            session.rollback()
+            raise e
+        return mapping

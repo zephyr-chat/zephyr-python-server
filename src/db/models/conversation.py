@@ -17,3 +17,9 @@ class ConversationMember(Base):
     conversation_id = Column(String, ForeignKey('conversations.id'), nullable=False)
     user_id = Column(String, ForeignKey("users.id"))
     user = relationship("User")
+
+class FederatedConversationMapping(Base):
+    __tablename__ = 'fed_conv_mapping'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    conversation_id = Column(String, ForeignKey('conversations.id'), nullable=False)
+    fed_conv_id = Column(String)
