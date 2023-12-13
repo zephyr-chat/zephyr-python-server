@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package zephyr;
+
+service AuthService {
+  rpc Authenticate(AuthRequest) returns (AuthResponse);
+  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+}
+
+message AuthRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  string access_token = 1;
+}
+
+message RegisterUserRequest {
+  string username = 1;
+  string password = 2;
+  string display_name = 3;
+}
+
+message RegisterUserResponse {
+  string user_id = 1;
+  string display_name = 2;
+}
