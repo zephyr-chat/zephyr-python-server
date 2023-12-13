@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, asdict
 
 import jwt
@@ -7,16 +7,13 @@ from grpc import ServicerContext, StatusCode
 import auth_pb2
 import auth_pb2_grpc
 from db.db_helper import DbHelper
-from config import SERVER_HOST, SERVER_PORT, SECRET_KEY
-
-SERVER_NAME = f"{SERVER_HOST}:{SERVER_PORT}"
-
-JWT_SIGNING_ALGORITHM = 'HS256'
+from db.models.user import User
+from config import *
 
 @dataclass
 class JwtTokenPayload:
     user_id: str
-    expiryDate: str
+    exp: str
 
     dict = asdict
 
@@ -41,10 +38,9 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         )
     
     def __generate_jwt_token(self, username: str) -> str:
-        expiryDate = datetime.now() + timedelta(weeks=1)
         payload = JwtTokenPayload(
             user_id=f"{username}@{SERVER_NAME}", 
-            expiryDate=expiryDate.strftime("%Y-%m-%d %H:%M:%S"))
+            exp=datetime.now(tz=timezone.utc) + timedelta(weeks=1))
         token = jwt.encode(payload.dict(), SECRET_KEY, algorithm=JWT_SIGNING_ALGORITHM)
         return token
     

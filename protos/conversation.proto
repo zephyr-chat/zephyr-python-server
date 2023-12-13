@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package zephyr;
+
+service ConversationService {
+    rpc CreateConversation(CreateConversationRequest) returns (ConversationReply);
+    rpc GetConversations(Empty) returns (GetConversationsReply);
+}
+
+message Empty {}
+
+message CreateConversationRequest {
+  string name = 1;
+  repeated string member_ids = 2;
+}
+
+message ConversationReply {
+  int64 id = 1;
+  string name = 2;
+}
+
+message GetConversationsReply {
+  repeated ConversationReply conversations = 2;
+}

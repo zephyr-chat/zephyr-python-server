@@ -8,6 +8,7 @@ from alembic import context
 import config as server_config
 from db.models.base import Base
 from db.models.user import *
+from db.models.conversation import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

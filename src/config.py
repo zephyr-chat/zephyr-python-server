@@ -6,3 +6,6 @@ SQLALCHEMY_URL = os.environ.get("ZEPHYR_DB_URL", "sqlite:///db.sqlite3")
 
 SERVER_HOST = os.environ.get("ZEPHYR_SERVER_HOST", "localhost")
 SERVER_PORT = os.environ.get("ZEPHYR_SERVER_PORT", "50051")
+SERVER_NAME = f"{SERVER_HOST}:{SERVER_PORT}"
+
+JWT_SIGNING_ALGORITHM = 'HS256'
