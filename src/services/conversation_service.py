@@ -29,7 +29,7 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
     def __make_create_conversation_call(self, stub: conv_pb2_grpc.ConversationServiceStub, request: conv_pb2.CreateConversationRequest, conversation_id: int) -> conv_pb2.ConversationReply:
         reply: conv_pb2.ConversationReply = None
         try:
-            metadata = [(b'parent_conv_id', str(conversation_id).encode())]
+            metadata = [(b'parent_conv_id', str(conversation_id).encode()), (b'parent_server', SERVER_NAME.encode())]
             reply = stub.CreateConversation(request, 10, metadata=metadata)
         except Exception as e:
             raise e
@@ -38,9 +38,12 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
     def CreateConversation(self, request: conv_pb2.CreateConversationRequest, context: ServicerContext) -> conv_pb2.ConversationReply:
         print(f"Trying to create conversation {request.name}")
         parent_conv_id = None
+        parent_server = None
         for item in context.invocation_metadata():
             if item.key == 'parent_conv_id':
-                parent_conv_id = item.value
+                parent_conv_id = int(item.value)
+            elif item.key == 'parent_server':
+                parent_server = item.value
 
         reply = conv_pb2.ConversationReply(name=request.name)
 
@@ -77,9 +80,9 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
                     channel = insecure_channel(server)
                     stub = conv_pb2_grpc.ConversationServiceStub(channel)
                     fed_reply = self.__make_create_conversation_call(stub, request, conversation.id)
-                    self.db_helper.add_fed_conv_mapping(conversation.id, fed_reply.id)
+                    self.db_helper.add_fed_conv_mapping(conversation.id, server, fed_reply.id)
             else:
-                self.db_helper.add_fed_conv_mapping(conversation.id, parent_conv_id)
+                self.db_helper.add_fed_conv_mapping(conversation.id, parent_server, parent_conv_id)
 
             reply.id = conversation.id
         except Exception as e:

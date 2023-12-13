@@ -153,8 +153,8 @@ class DbHelper:
             raise e
         return event
     
-    def add_fed_conv_mapping(self, conversation_id: str, fed_conv_id: str) -> FederatedConversationMapping:
-        mapping = FederatedConversationMapping(conversation_id=conversation_id, fed_conv_id=fed_conv_id)
+    def add_fed_conv_mapping(self, conversation_id: str, server: str, fed_conv_id: str) -> FederatedConversationMapping:
+        mapping = FederatedConversationMapping(conversation_id=conversation_id, server=server, fed_conv_id=fed_conv_id)
         session = self.session_factory()
         try:
             session.add(mapping)
@@ -162,5 +162,15 @@ class DbHelper:
             session.refresh(mapping)
         except Exception as e:
             session.rollback()
+            raise e
+        return mapping
+    
+    def get_fed_conv_mappings(self, conversation_id: str, server: str) -> FederatedConversationMapping:
+        session = self.session_factory()
+        mapping = None
+        try:
+            mapping = session.query(FederatedConversationMapping).filter_by(
+                conversation_id=conversation_id, server=server).options(joinedload('*')).first()
+        except Exception as e:
             raise e
         return mapping
