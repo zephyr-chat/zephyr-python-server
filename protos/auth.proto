@@ -4,7 +4,8 @@ package zephyr;
 
 service AuthService {
   rpc Authenticate(AuthRequest) returns (AuthResponse);
-  rpc RegisterUser(RegisterUserRequest) returns (RegisterUserResponse);
+  rpc RegisterUser(RegisterUserRequest) returns (UserResponse);
+  rpc GetUserDetails(GetUserDetailsRequest) returns (UserResponse);
 }
 
 message AuthRequest {
@@ -22,7 +23,11 @@ message RegisterUserRequest {
   string display_name = 3;
 }
 
-message RegisterUserResponse {
+message UserResponse {
   string user_id = 1;
   string display_name = 2;
+}
+
+message GetUserDetailsRequest {
+  string user_id = 1;
 }

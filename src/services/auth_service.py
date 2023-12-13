@@ -22,7 +22,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
     def __init__(self, db_helper: DbHelper):
         self.db_helper = db_helper
 
-    def RegisterUser(self, request: auth_pb2.RegisterUserRequest, context: ServicerContext) -> auth_pb2.RegisterUserResponse:
+    def RegisterUser(self, request: auth_pb2.RegisterUserRequest, context: ServicerContext) -> auth_pb2.UserResponse:
         print(f"Trying to register user: {request.username}")
         try:
             self.db_helper.add_user(
@@ -32,7 +32,7 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
         except Exception as e:
             print(f"Error occured while registering user: {str(e)}")
             context.abort(code=StatusCode.ALREADY_EXISTS, details='Username already exists')
-        return auth_pb2.RegisterUserResponse(
+        return auth_pb2.UserResponse(
             user_id=f"{request.username}@{SERVER_NAME}",
             display_name=request.display_name
         )
@@ -57,5 +57,18 @@ class AuthService(auth_pb2_grpc.AuthServiceServicer):
             print(f"Error occured while authenticating user: {str(e)}")
             context.abort(code=StatusCode.ABORTED, details='Error occured while authentication')
         
+        return reply
+    
+    def GetUserDetails(self, request: auth_pb2.GetUserDetailsRequest, context: ServicerContext) -> auth_pb2.UserResponse:
+        reply = auth_pb2.UserResponse(user_id=request.user_id)
+        try:
+            username, server = request.user_id.split("@")
+            user = self.db_helper.get_user(username, server)
+            reply.display_name = user.display_name
+        except Exception as e:
+            message = f"Error occured while getting user: {str(e)}"
+            print(message)
+            context.abort(code=StatusCode.ABORTED, details=message)
+
         return reply
     
