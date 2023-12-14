@@ -1,4 +1,5 @@
 from grpc import ServicerContext, StatusCode, insecure_channel
+from google.protobuf.json_format import MessageToJson
 
 import auth_pb2
 import auth_pb2_grpc
@@ -37,6 +38,7 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
 
     def CreateConversation(self, request: conv_pb2.CreateConversationRequest, context: ServicerContext) -> conv_pb2.ConversationReply:
         print(f"Trying to create conversation {request.name}")
+        print(MessageToJson(request))
         parent_conv_id = None
         parent_server = None
         for item in context.invocation_metadata():
