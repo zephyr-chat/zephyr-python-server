@@ -104,8 +104,6 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
                         id=conversation.id,
                         name=conversation.name
                     ))
-            else:
-                context.abort(code=StatusCode.ABORTED, details="Error while getting conversations")
         except Exception as e:
             message = f'Error while getting conversations: {str(e)}'
             print(message)
