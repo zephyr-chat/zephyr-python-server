@@ -15,7 +15,7 @@ ENCODING = 'utf-8'
 class DbHelper:
     
     def __init__(self):
-        db_engine = create_engine(SQLALCHEMY_URL)
+        db_engine = create_engine(SQLALCHEMY_URL, pool_size=20, max_overflow=30)
         self.session_factory = sessionmaker(bind=db_engine)
 
     @classmethod

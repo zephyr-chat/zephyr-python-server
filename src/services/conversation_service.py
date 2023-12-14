@@ -51,6 +51,8 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
             federated_users = {}
             members = []
             for id in request.member_ids:
+                if '@' not in id:
+                    id = f"{id}@{SERVER_NAME}"
                 username, server = id.split("@")
                 user = self.db_helper.get_user(username, server)
                 if user is None: 
@@ -75,7 +77,7 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
                 self.db_helper.add_conversation_member(conversation, member)
 
             if not parent_conv_id:
-                fed_servers = set([id.split("@")[1] for id in request.member_ids if id.split("@")[1] != SERVER_NAME])
+                fed_servers = set([id.split("@")[1] for id in request.member_ids if '@' in id and id.split("@")[1] != SERVER_NAME])
                 for server in fed_servers:
                     channel = insecure_channel(server)
                     stub = conv_pb2_grpc.ConversationServiceStub(channel)
@@ -86,6 +88,7 @@ class ConversationService(conv_pb2_grpc.ConversationServiceServicer):
 
             reply.id = conversation.id
         except Exception as e:
+            raise e
             message = f'Error while creating conversation: {str(e)}'
             print(message)
             context.abort(code=StatusCode.ABORTED, details=message)
